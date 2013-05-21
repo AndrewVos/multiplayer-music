@@ -1,11 +1,12 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    em-websocket (0.5.0)
+    addressable (2.3.4)
+    daemons (1.1.9)
+    em-websocket (0.3.8)
+      addressable (>= 2.1.1)
       eventmachine (>= 0.12.9)
-      http_parser.rb (~> 0.5.3)
     eventmachine (1.0.3)
-    http_parser.rb (0.5.3)
     rack (1.5.2)
     rack-protection (1.5.0)
       rack
@@ -13,11 +14,19 @@ GEM
       rack (~> 1.5, >= 1.5.2)
       rack-protection (~> 1.4)
       tilt (~> 1.3, >= 1.3.4)
+    sinatra-websocket (0.3.0)
+      em-websocket (~> 0.3.6)
+      eventmachine
+      thin (>= 1.3.1)
+    thin (1.5.1)
+      daemons (>= 1.0.9)
+      eventmachine (>= 0.12.6)
+      rack (>= 1.0.0)
     tilt (1.4.1)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  em-websocket
   sinatra
+  sinatra-websocket

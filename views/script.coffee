@@ -1,4 +1,4 @@
-host = "ws://" + window.location.hostname + ":8080"
+host = "ws://" + window.location.host
 socket = new WebSocket(host)
 
 logSomething = (l) ->
