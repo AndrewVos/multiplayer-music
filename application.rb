@@ -13,7 +13,7 @@ sound_effects = Dir.glob("public/ogg/**/*.ogg").map do |path|
 end
 connected_count = 0
 
-get "/" do
+get "/?" do
   if request.websocket?
     request.websocket do |socket|
       client_key = env["HTTP_SEC_WEBSOCKET_KEY"]
