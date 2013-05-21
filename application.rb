@@ -6,7 +6,7 @@ get "/" do
   haml :index
 end
 
-get "/script.js" do
+get "/scripts/script.js" do
   content_type "text/javascript"
   coffee :script
 end
