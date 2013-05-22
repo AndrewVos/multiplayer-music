@@ -30,7 +30,7 @@ get "/?" do
         socket.onmessage do |value|
           value = JSON.parse(value)
           message = {
-            :key         => client_key + value["instrument"],
+            :client_key  => client_key,
             :type        => "play_sound",
             :play        => value["state"] == "down" ? true : false,
             :instrument  => value["instrument"]
