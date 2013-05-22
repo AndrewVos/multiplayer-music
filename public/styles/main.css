@@ -1,0 +1,8 @@
+.instrument {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  min-width: 10px;
+  min-height: 10px;
+  background-color: grey;
+}

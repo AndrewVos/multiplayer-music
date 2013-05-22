@@ -2,32 +2,43 @@ host = "ws://" + window.location.host
 socket = new WebSocket(host)
 
 logSomething = (l) ->
-  $("body").append($("<p>" + l + "</p>"))
+  $(".messages").append($("<p>" + l + "</p>"))
 
 socket.onmessage = (event)->
   json = jQuery.parseJSON(event.data)
   @soundPlayers ||= {}
 
   if json.type == "play_sound"
-    unless json.client_key of @soundPlayers
+    unless json.key of @soundPlayers
       soundPlayer = new SoundPlayer(json.instrument)
-      @soundPlayers[json.client_key] = soundPlayer
+      @soundPlayers[json.key] = soundPlayer
 
-    if json.button_down
-      @soundPlayers[json.client_key].play()
+    if json.play
+      @soundPlayers[json.key].play()
     else
-      @soundPlayers[json.client_key].stop()
+      @soundPlayers[json.key].stop()
   else if json.type == "log"
     logSomething(json.message)
 
 $().ready ->
-  $("#play").mousedown ->
-    try
-      socket.send("d")
+  createInstrumentButtons()
 
-  $("#play").mouseup ->
-    try
-      socket.send("u")
+createInstrumentButtons = ->
+  jQuery.getJSON "/instruments", (instruments) ->
+    for instrument in instruments
+      do (instrument) ->
+        container = $(".instruments")
+        button = $("<div class='instrument'></div>")
+        container.append(button)
+        button.mousedown ->
+          sendInstrumentStateChange("down", instrument)
+          button.css("background-color", "red")
+        button.mouseup ->
+          sendInstrumentStateChange("up", instrument)
+          button.css("background-color", "grey")
+
+sendInstrumentStateChange = (state, instrument) ->
+  socket.send(JSON.stringify({state: state, instrument: instrument}))
 
 class SoundPlayer
   constructor: (@instrument) ->
