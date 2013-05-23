@@ -1,24 +1,29 @@
 host = "ws://" + window.location.host
 socket = new WebSocket(host)
 
+$().ready ->
+  createInstrumentButtons()
+
 socket.onmessage = (event)->
   json = jQuery.parseJSON(event.data)
-  @soundPlayers ||= {}
-
   if json.type == "play_sound"
-    soundPlayerId = json.client_key + json.instrument
-    unless soundPlayerId of @soundPlayers
-      soundPlayer = new SoundPlayer(json.instrument)
-      @soundPlayers[soundPlayerId] = soundPlayer
-
-    if json.play
-      @soundPlayers[soundPlayerId].play()
-      highlightUserInstrument(json.client_key, json.instrument, "red")
-    else
-      @soundPlayers[soundPlayerId].stop()
-      highlightUserInstrument(json.client_key, json.instrument, "grey")
+    playSound(json.client_key, json.instrument, json.play)
   else if json.type == "log"
     console.log(json.message)
+
+playSound = (client_key, instrument, play) ->
+  @soundPlayers ||= {}
+  soundPlayerId = client_key + instrument
+
+  unless soundPlayerId of @soundPlayers
+    @soundPlayers[soundPlayerId] = new SoundPlayer(instrument)
+
+  if play
+    @soundPlayers[soundPlayerId].play()
+    highlightUserInstrument(client_key, instrument, "red")
+  else
+    @soundPlayers[soundPlayerId].stop()
+    highlightUserInstrument(client_key, instrument, "grey")
 
 highlightUserInstrument = (client_key, instrument, colour) ->
   id = client_key.replace(/[^\w]/g, "")
@@ -33,9 +38,6 @@ highlightUserInstrument = (client_key, instrument, colour) ->
       do (x) ->
         clientInstruments.append($("<div id='#{x + id}' class='instrument'></div>"))
   $("div#" + instrument + id).css("background-color", colour)
-
-$().ready ->
-  createInstrumentButtons()
 
 createInstrumentButtons = ->
   jQuery.getJSON "/instruments", (instruments) ->
