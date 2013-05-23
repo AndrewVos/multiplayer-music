@@ -13,31 +13,12 @@ socket.onmessage = (event)->
 
 playSound = (client_key, instrument, play) ->
   @soundPlayers ||= {}
-  soundPlayerId = client_key + instrument
-
-  unless soundPlayerId of @soundPlayers
-    @soundPlayers[soundPlayerId] = new SoundPlayer(instrument)
-
+  unless client_key of @soundPlayers
+    @soundPlayers[client_key] = new SoundPlayer(client_key)
   if play
-    @soundPlayers[soundPlayerId].play()
-    highlightUserInstrument(client_key, instrument, "red")
+    @soundPlayers[client_key].play(instrument)
   else
-    @soundPlayers[soundPlayerId].stop()
-    highlightUserInstrument(client_key, instrument, "grey")
-
-highlightUserInstrument = (client_key, instrument, colour) ->
-  id = client_key.replace(/[^\w]/g, "")
-  if $("div#" + id).length > 0
-    clientInstruments = $("div#" + id)
-  else
-    clientInstruments = $("<div>")
-    clientInstruments.attr("id", id)
-    clientInstruments.append($("<h2>" + id + "</h2>"))
-    $(".other-instruments").append(clientInstruments)
-    for x in window.instruments
-      do (x) ->
-        clientInstruments.append($("<div id='#{x + id}' class='instrument'></div>"))
-  $("div#" + instrument + id).css("background-color", colour)
+    @soundPlayers[client_key].stop(instrument)
 
 createInstrumentButtons = ->
   jQuery.getJSON "/instruments", (instruments) ->
@@ -58,12 +39,26 @@ sendInstrumentStateChange = (state, instrument) ->
   socket.send(JSON.stringify({state: state, instrument: instrument}))
 
 class SoundPlayer
-  constructor: (@instrument) ->
-    if buzz.isAACSupported()
-      @player = new buzz.sound("/aac/" + @instrument + ".m4a")
-    else if buzz.isOGGSupported()
-      @player = new buzz.sound("/ogg/" + @instrument + ".ogg")
-  play: ->
-    @player.loop().play()
-  stop: ->
-    @player.stop()
+  constructor: (@clientKey) ->
+    @instruments = {}
+    @id = @clientKey.replace(/[^\w]/g, "")
+    @clientInstruments = $("<div>")
+    @clientInstruments.attr("id", @id)
+    @clientInstruments.append($("<h2>" + @id + "</h2>"))
+    $(".other-instruments").append(@clientInstruments)
+    for instrument in window.instruments
+      do (instrument) =>
+        @clientInstruments.append($("<div id='#{instrument + @id}' class='instrument'></div>"))
+
+  play: (instrument) ->
+    unless instrument of @instruments
+      if buzz.isAACSupported()
+        @instruments[instrument] = new buzz.sound("/aac/" + instrument + ".m4a")
+      else if buzz.isOGGSupported()
+        @instruments[instrument] = new buzz.sound("/ogg/" + instrument + ".ogg")
+    @instruments[instrument].loop().play()
+    $("div#" + instrument + @id).css("background-color", "red")
+
+  stop: (instrument) ->
+    @instruments[instrument].stop()
+    $("div#" + instrument + @id).css("background-color", "grey")
