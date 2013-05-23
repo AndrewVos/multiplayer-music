@@ -31,8 +31,8 @@ highlightUserInstrument = (client_key, instrument, colour) ->
     $(".other-instruments").append(clientInstruments)
     for x in window.instruments
       do (x) ->
-        clientInstruments.append($("<div id='#{x}' class='instrument'></div>"))
-  $("div#" + instrument).css("background-color", colour)
+        clientInstruments.append($("<div id='#{x + id}' class='instrument'></div>"))
+  $("div#" + instrument + id).css("background-color", colour)
 
 $().ready ->
   createInstrumentButtons()
